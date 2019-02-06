@@ -1,5 +1,5 @@
 (class TestComponent extends HTMLElement {
-    static Init(tagname = 'test-component') { if (customElements.get(tagname)) {
+    static Init(tagname = 'hello-world') { if (customElements.get(tagname)) {
         return;
     } customElements.define(tagname, this); }
     constructor() {
