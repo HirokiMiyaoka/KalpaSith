@@ -1,7 +1,9 @@
-## Blog
+# Kalpa Sith
 
-<blo-grass></blo-grass>
+Sample page.
 
-## Hobby
+## Component
 
-* [Game](/game/)
+Dynamic load.
+
+<hello-world>World!</hello-world>
