@@ -1,0 +1,20 @@
+{
+	"compilerOptions": {
+		"outFile": "./app.d.ts",
+		"declaration": true,
+		"emitDeclarationOnly": true,
+		"module": "amd",
+		"target": "es2017",
+		"moduleResolution": "node",
+		"strictNullChecks": true,
+		"noImplicitAny": true,
+		"removeComments": true,
+		"preserveConstEnums": false,
+		"keyofStringsOnly": true,
+		"sourceMap": false
+	},
+	"include": [
+		"./site/index.ts",
+		"./types.d.ts"
+	]
+}
