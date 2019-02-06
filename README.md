@@ -1,1 +1,3 @@
 # KalpaSith
+
+Lightweight SPA library.
