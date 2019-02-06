@@ -2,6 +2,10 @@
 
 Sample page.
 
+## Page
+
+[link](./sample/)
+
 ## Component
 
 Dynamic load.
