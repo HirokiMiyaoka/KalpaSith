@@ -292,7 +292,7 @@ class KalpaSith extends HTMLElement {
         super();
         this.modules = [];
         this.basetitle = document.title;
-        KalpaSith.Version = App.script.src.split('?').pop() || '';
+        KalpaSith.Version = App.script.src.includes('?') ? App.script.src.split('?').pop() || '' : '';
         const root = (App.script.dataset.root || '') + '/';
         this.history = new AppHistory(this);
         this.components = new WebComponentsManager(root + 'wc/');
@@ -324,14 +324,12 @@ class KalpaSith extends HTMLElement {
         customElements.whenDefined('kalpa-sith').then(() => {
             const redirect = sessionStorage.redirect;
             delete sessionStorage.redirect;
-            if (redirect && redirect !== location.href) {
+            if (redirect && typeof redirect === 'string' && redirect !== location.href) {
                 history.replaceState(null, '', redirect);
-                this.render(redirect);
+                return redirect;
             }
-            else {
-                this.render(location.href);
-            }
-        });
+            return location.href;
+        }).then((url) => { this.render(url); });
     }
     static Init(tagname = 'kalpa-sith') { if (customElements.get(tagname)) {
         return;

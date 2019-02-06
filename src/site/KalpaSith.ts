@@ -28,7 +28,7 @@ class KalpaSith extends HTMLElement implements Renderer
 		super();
 		this.modules = [];
 		this.basetitle = document.title;
-		KalpaSith.Version = App.script.src.split( '?' ).pop() || '';
+		KalpaSith.Version = App.script.src.includes( '?' ) ? App.script.src.split( '?' ).pop() || '' : '';
 		const root = ( App.script.dataset.root || '' ) + '/';
 		this.history = new AppHistory( this );
 		this.components = new WebComponentsManager( root + 'wc/' );

@@ -1,6 +1,6 @@
 (class TestComponent extends HTMLElement
 {
-	public static Init( tagname = 'test-component' ) { if ( customElements.get( tagname ) ) { return; } customElements.define( tagname, this ); }
+	public static Init( tagname = 'hello-world' ) { if ( customElements.get( tagname ) ) { return; } customElements.define( tagname, this ); }
 
 	constructor()
 	{
