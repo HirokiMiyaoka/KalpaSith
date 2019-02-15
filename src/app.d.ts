@@ -1,7 +1,13 @@
-declare function ClearElements(element: HTMLElement): void;
-declare function Fetch(input: RequestInfo, init?: RequestInit): Promise<Response>;
-declare function FetchJson<T>(input: RequestInfo, init?: RequestInit): Promise<T>;
-declare function FetchText(input: RequestInfo, init?: RequestInit): Promise<string>;
+declare const App: {
+    script: HTMLScriptElement;
+    main: () => KalpaSith;
+    wait: () => Promise<void>;
+    load: (...components: string[]) => Promise<void>;
+    clear: (element: HTMLElement) => void;
+    fetch: (input: RequestInfo, init?: RequestInit | undefined) => Promise<Response>;
+    fetchJson: <T>(input: RequestInfo, init?: RequestInit | undefined) => Promise<T>;
+    fetchText: (input: RequestInfo, init?: RequestInit | undefined) => Promise<string>;
+};
 interface GetParams {
     [key: string]: any;
 }
@@ -102,9 +108,3 @@ declare class ServiceWorkerClient {
     sendMessage(message: SW_MESSAGE): Promise<{}>;
 }
 declare function BrowserCheck(): boolean;
-declare function QRLink(qrbutton: HTMLElement): void;
-declare const App: {
-    script: HTMLScriptElement;
-    main: () => KalpaSith;
-    wait: () => Promise<void>;
-};

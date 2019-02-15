@@ -1,36 +1,58 @@
-function ClearElements(element) {
-    if (!element) {
-        return;
+const App = ((script) => {
+    function GetApp() {
+        const kalpa = document.querySelector('kalpa-sith');
+        if (kalpa) {
+            app.main = () => { return kalpa; };
+        }
+        return kalpa;
     }
-    const children = element.children;
-    for (let i = children.length - 1; 0 <= i; --i) {
-        element.removeChild(children[i]);
+    function Wait() { return customElements.whenDefined('kalpa-sith'); }
+    function Load(...components) { return app.main().loadComponents(...components); }
+    function ClearElements(element) {
+        if (!element) {
+            return;
+        }
+        const children = element.children;
+        for (let i = children.length - 1; 0 <= i; --i) {
+            element.removeChild(children[i]);
+        }
     }
-}
-function Fetch(input, init) {
-    return fetch(input, init).then((result) => {
-        if (result.ok) {
-            return result;
-        }
-        throw result;
-    });
-}
-function FetchJson(input, init) {
-    return fetch(input, init).then((result) => {
-        if (result.ok) {
-            return result.json();
-        }
-        return result.json().then((result) => { throw result; });
-    });
-}
-function FetchText(input, init) {
-    return fetch(input, init).then((result) => {
-        if (result.ok) {
-            return result.text();
-        }
-        return result.text().then((result) => { throw result; });
-    });
-}
+    function Fetch(input, init) {
+        return fetch(input, init).then((result) => {
+            if (result.ok) {
+                return result;
+            }
+            throw result;
+        });
+    }
+    function FetchJson(input, init) {
+        return fetch(input, init).then((result) => {
+            if (result.ok) {
+                return result.json();
+            }
+            return result.json().then((result) => { throw result; });
+        });
+    }
+    function FetchText(input, init) {
+        return fetch(input, init).then((result) => {
+            if (result.ok) {
+                return result.text();
+            }
+            return result.text().then((result) => { throw result; });
+        });
+    }
+    const app = {
+        script: script,
+        main: GetApp,
+        wait: Wait,
+        load: Load,
+        clear: ClearElements,
+        fetch: Fetch,
+        fetchJson: FetchJson,
+        fetchText: FetchText,
+    };
+    return app;
+})(document.currentScript);
 class AppHistory {
     constructor(renderer) {
         this.renderer = renderer;
@@ -221,7 +243,7 @@ class CommonMark extends HTMLElement {
         if (!value) {
             return;
         }
-        FetchText(value).then((md) => {
+        App.fetchText(value).then((md) => {
             this.textContent = md;
             this.dispatchEvent(new Event('load'));
         }).catch((error) => {
@@ -375,7 +397,7 @@ class KalpaSith extends HTMLElement {
     loading(on) { this.nowloading.loading = on; }
     clear() {
         document.title = this.basetitle;
-        ClearElements(this);
+        App.clear(this);
     }
     gotoPage(url) { return this.history.gotoPage(url); }
     render(url) {
@@ -386,7 +408,7 @@ class KalpaSith extends HTMLElement {
                 continue;
             }
             return mod.render(path).then(() => {
-                ClearElements(this);
+                App.clear(this);
                 this.appendChild(mod);
             });
         }
@@ -395,7 +417,7 @@ class KalpaSith extends HTMLElement {
         }
         path += '.md';
         this.commonmark.src = path;
-        ClearElements(this);
+        App.clear(this);
         this.appendChild(this.commonmark);
         return Promise.resolve();
     }
@@ -460,42 +482,11 @@ function BrowserCheck() {
     }
     return true;
 }
-function QRLink(qrbutton) {
-    qrbutton.addEventListener('click', (link) => {
-        const tid = qrbutton.dataset.target;
-        if (!tid) {
-            return;
-        }
-        const target = document.getElementById(tid);
-        if (!target) {
-            return;
-        }
-        if (target.classList.contains('show')) {
-            target.classList.remove('show');
-            return;
-        }
-        const url = location.href;
-        let first = false;
-        target.querySelectorAll('qr-code').forEach((qr) => {
-            if (!qr.value) {
-                first = true;
-            }
-            if (qr.value === url) {
-                return;
-            }
-            qr.value = url;
-        });
-        if (first) {
-            target.addEventListener('click', () => { target.classList.remove('show'); }, false);
-        }
-        target.classList.add('show');
-    }, false);
-}
 document.addEventListener('DOMContentLoaded', () => {
     if (!BrowserCheck()) {
         return;
     }
-    document.getElementById('legacy').style.display = 'none';
+    document.getElementById('legacy').classList.remove('view');
     customElements.whenDefined('now-loading').then(() => {
         return customElements.whenDefined('kalpa-sith');
     });
@@ -503,25 +494,39 @@ document.addEventListener('DOMContentLoaded', () => {
     CommonMark.Init();
     ScrollBox.Init();
     KalpaSith.Init();
-    QRLink(document.getElementById('qrlink'));
+    ((qrbutton) => {
+        qrbutton.addEventListener('click', (link) => {
+            const tid = qrbutton.dataset.target;
+            if (!tid) {
+                return;
+            }
+            const target = document.getElementById(tid);
+            if (!target) {
+                return;
+            }
+            if (target.classList.contains('show')) {
+                target.classList.remove('show');
+                return;
+            }
+            const url = location.href;
+            let first = false;
+            target.querySelectorAll('qr-code').forEach((qr) => {
+                if (!qr.value) {
+                    first = true;
+                }
+                if (qr.value === url) {
+                    return;
+                }
+                qr.value = url;
+            });
+            if (first) {
+                target.addEventListener('click', () => { target.classList.remove('show'); }, false);
+            }
+            target.classList.add('show');
+        }, false);
+    })(document.getElementById('qrlink'));
     if (App.script.dataset.sw) {
         const sw = new ServiceWorkerClient();
         sw.initServiceWorker(App.script.dataset.sw);
     }
 });
-const App = ((script) => {
-    function GetApp() {
-        const kalpa = document.querySelector('kalpa-sith');
-        if (kalpa) {
-            app.main = () => { return kalpa; };
-        }
-        return kalpa;
-    }
-    function Wait() { return customElements.whenDefined('kalpa-sith'); }
-    const app = {
-        script: script,
-        main: GetApp,
-        wait: Wait,
-    };
-    return app;
-})(document.currentScript);

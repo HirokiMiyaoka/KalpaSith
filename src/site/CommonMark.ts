@@ -65,7 +65,7 @@ class CommonMark extends HTMLElement
 	private onUpdateSrc( value: string )
 	{
 		if ( !value ) { return; }
-		FetchText( value ).then( ( md ) =>
+		App.fetchText( value ).then( ( md ) =>
 		{
 			this.textContent = md;
 			this.dispatchEvent( new Event( 'load' ) );

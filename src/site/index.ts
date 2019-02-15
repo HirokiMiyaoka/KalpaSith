@@ -1,3 +1,4 @@
+/// <reference path="./App.ts" />
 /// <reference path="./KalpaSith.ts" />
 /// <reference path="./ServiceWorker.ts" />
 
@@ -18,42 +19,13 @@ function BrowserCheck()
 	return true;
 }
 
-function QRLink( qrbutton: HTMLElement )
-{
-	qrbutton.addEventListener( 'click', ( link ) =>
-	{
-		const tid = qrbutton.dataset.target;
-		if ( !tid ) { return; }
-		const target = document.getElementById( tid );
-		if ( !target ) { return; }
-
-		if ( target.classList.contains( 'show' ) )
-		{
-			target.classList.remove( 'show' );
-			return;
-		}
-
-		const url = location.href;
-		let first = false;
-		target.querySelectorAll( 'qr-code' ).forEach( ( qr: HTMLInputElement ) =>
-		{
-			if ( !qr.value ) { first = true; }
-			if ( qr.value === url ) { return; }
-			qr.value = url;
-		} );
-
-		if ( first ) { target.addEventListener( 'click', () => { target.classList.remove( 'show' ); }, false ); }
-		target.classList.add( 'show' );
-	}, false );
-}
-
 document.addEventListener( 'DOMContentLoaded', () =>
 {
 	// Legacy Browser.
 	if ( !BrowserCheck() ) { return; }
 
 	// Modern browser.
-	(<HTMLElement>document.getElementById( 'legacy' )).style.display = 'none';
+	(<HTMLElement>document.getElementById( 'legacy' )).classList.remove( 'view' );
 
 	customElements.whenDefined( 'now-loading' ).then( () =>
 	{
@@ -65,7 +37,35 @@ document.addEventListener( 'DOMContentLoaded', () =>
 	CommonMark.Init();
 	ScrollBox.Init();
 	KalpaSith.Init();
-	QRLink( <HTMLElement>document.getElementById( 'qrlink' ) );
+
+	( ( qrbutton: HTMLElement ) =>
+	{
+		qrbutton.addEventListener( 'click', ( link ) =>
+		{
+			const tid = qrbutton.dataset.target;
+			if ( !tid ) { return; }
+			const target = document.getElementById( tid );
+			if ( !target ) { return; }
+
+			if ( target.classList.contains( 'show' ) )
+			{
+				target.classList.remove( 'show' );
+				return;
+			}
+
+			const url = location.href;
+			let first = false;
+			target.querySelectorAll( 'qr-code' ).forEach( ( qr: HTMLInputElement ) =>
+			{
+				if ( !qr.value ) { first = true; }
+				if ( qr.value === url ) { return; }
+				qr.value = url;
+			} );
+
+			if ( first ) { target.addEventListener( 'click', () => { target.classList.remove( 'show' ); }, false ); }
+			target.classList.add( 'show' );
+		}, false );
+	} )( <HTMLElement>document.getElementById( 'qrlink' ) );
 
 	if ( App.script.dataset.sw )
 	{
@@ -74,24 +74,3 @@ document.addEventListener( 'DOMContentLoaded', () =>
 		sw.initServiceWorker( App.script.dataset.sw );
 	}
 } );
-
-const App = ( ( script: HTMLScriptElement ) =>
-{
-	function GetApp()
-	{
-		const kalpa = <KalpaSith>document.querySelector( 'kalpa-sith' );
-		if ( kalpa ) { app.main = () => { return kalpa; }; }
-		return kalpa;
-	}
-
-	function Wait() { return customElements.whenDefined( 'kalpa-sith' ); }
-
-	const app =
-	{
-		script: script,
-		main: GetApp,
-		wait: Wait,
-	};
-
-	return app;
-} )( <HTMLScriptElement>document.currentScript );

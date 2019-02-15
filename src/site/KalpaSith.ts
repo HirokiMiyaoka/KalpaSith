@@ -1,4 +1,3 @@
-/// <reference path="./Commons.ts" />
 /// <reference path="./AppHistory.ts" />
 /// <reference path="./WebComponentsManager.ts" />
 // Default components.
@@ -121,7 +120,7 @@ class KalpaSith extends HTMLElement implements Renderer
 	public clear()
 	{
 		document.title = this.basetitle;
-		ClearElements( this );
+		App.clear( this );
 	}
 
 	public gotoPage( url: string ) { return this.history.gotoPage( url ); }
@@ -137,7 +136,7 @@ class KalpaSith extends HTMLElement implements Renderer
 			if ( !mod.isSupported( path ) ) { continue; }
 			return mod.render( path ).then( () =>
 			{
-				ClearElements( this );
+				App.clear( this );
 				this.appendChild( mod );
 			} );
 		}
@@ -145,7 +144,7 @@ class KalpaSith extends HTMLElement implements Renderer
 		if ( path.match( '/$' ) ) { path += 'index' }
 		path += '.md';
 		this.commonmark.src = path;
-		ClearElements( this );
+		App.clear( this );
 		this.appendChild( this.commonmark );
 
 		return Promise.resolve();
