@@ -486,7 +486,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!BrowserCheck()) {
         return;
     }
-    document.getElementById('legacy').classList.remove('view');
+    document.getElementById('legacy').style.display = 'none';
     customElements.whenDefined('now-loading').then(() => {
         return customElements.whenDefined('kalpa-sith');
     });

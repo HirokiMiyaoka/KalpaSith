@@ -25,7 +25,7 @@ document.addEventListener( 'DOMContentLoaded', () =>
 	if ( !BrowserCheck() ) { return; }
 
 	// Modern browser.
-	(<HTMLElement>document.getElementById( 'legacy' )).classList.remove( 'view' );
+	(<HTMLElement>document.getElementById( 'legacy' )).style.display = 'none';
 
 	customElements.whenDefined( 'now-loading' ).then( () =>
 	{
