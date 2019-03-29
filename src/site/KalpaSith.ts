@@ -15,12 +15,24 @@ class KalpaSith extends HTMLElement implements Renderer
 	public static Version = '';
 	private basetitle: string;
 	private modules: KalpaSithModule[];
-	private nowloading: NowLoading;
+	private nowloading: NowLoadingElement;
 	private history: AppHistory;
 	private components: WebComponentsManager;
-	private commonmark: CommonMark;
+	private commonmark: CommonMarkElement;
 
-	public static Init( tagname = 'kalpa-sith' ) { if ( customElements.get( tagname ) ) { return; } customElements.define( tagname, this ); }
+	public static Init( tagname = 'kalpa-sith' )
+	{
+		if ( customElements.get( tagname ) ) { return Promise.resolve(); }
+		return Promise.all(
+		[
+			customElements.whenDefined( 'now-loading' ),
+			customElements.whenDefined( 'common-mark' ),
+		] ).then( () =>
+		{
+			customElements.define( tagname, this );
+			return customElements.whenDefined( tagname );
+		} );
+	}
 
 	constructor()
 	{
@@ -32,9 +44,8 @@ class KalpaSith extends HTMLElement implements Renderer
 		this.history = new AppHistory( this );
 		this.components = new WebComponentsManager( root + 'wc/' );
 		this.components.suffix = KalpaSith.Version;
-		this.components.exclude( 'kalpa-sith', 'now-loading', 'common-mark', 'scroll-box', 'qr-code' );
-		this.commonmark = new CommonMark();
-		this.nowloading = new NowLoading();
+		this.commonmark = new (customElements.get( 'common-mark' ))();
+		this.nowloading = new (customElements.get( 'now-loading' ))();
 		document.body.appendChild( this.nowloading );
 
 		const shadow = this.attachShadow( { mode: 'open' } );

@@ -1,11 +1,24 @@
 class WebComponentsManager
 {
+	private static TAGS: { [ key: string ]: HTMLScriptElement } = {};
+
+	public static Exclude( ... tags: string[] )
+	{
+		tags.forEach( ( tag ) =>
+		{
+			if ( !this.TAGS[ tag ] ) { this.TAGS[ tag ] = document.createElement( 'script' ); }
+			if ( !this.TAGS[ tag ].hasAttribute( 'loaded' ) ) { this.TAGS[ tag ].setAttribute( 'loaded', '' ); }
+		} );
+	}
+
 	private base: string;
-	private tags: { [ key: string ]: HTMLScriptElement } = {};
+	private tags: { [ key: string ]: HTMLScriptElement };
 
 	constructor( base: string = '' )
 	{
 		this.base = base;
+
+		this.tags = Object.assign( {}, WebComponentsManager.TAGS );
 
 		const define = customElements.define;
 		customElements.define = ( name: string, constructor: Function, option?: ElementDefinitionOptions ) =>
@@ -14,6 +27,8 @@ class WebComponentsManager
 			define.call( customElements, name, constructor, option );
 		};
 	}
+
+	private log( ...message: string[] ) { if ( location.hostname === 'localhost' ) { console.log( ... message ); } }
 
 	private _suffix = '';
 	get suffix() { return this._suffix; }
@@ -49,7 +64,7 @@ class WebComponentsManager
 			this.tags[ tag ] = document.createElement( 'script' );
 			if ( !customElements.get( tag ) )
 			{
-				console.log( 'load:', tag );
+				this.log( 'load:', tag );
 				this.tags[ tag ].type = 'text/javascript';
 				this.tags[ tag ].onloadend = () => { this.tags[ tag ].setAttribute( 'loaded', '' ); };
 				this.tags[ tag ].src = [ this.base, tag, '.js', this.suffix ].join( '' );
@@ -62,7 +77,7 @@ class WebComponentsManager
 	public load( tag: string )
 	{
 		tag = this.loadScript( tag );
-		return customElements.whenDefined( tag ).then( () => { console.log( 'loaded:', tag ); } );
+		return customElements.whenDefined( tag ).then( () => { this.log( 'loaded:', tag ); } );
 	}
 
 	public async loadAsync( tags: string[] )

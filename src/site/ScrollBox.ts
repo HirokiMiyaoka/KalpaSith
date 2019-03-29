@@ -1,4 +1,7 @@
-class ScrollBox extends HTMLElement
+( ( wc ) =>
+{
+	wc.Init();
+} )( class ScrollBox extends HTMLElement
 {
 	public static Init( tagname = 'scroll-box' ) { if ( customElements.get( tagname ) ) { return; } customElements.define( tagname, this ); }
 
@@ -22,4 +25,4 @@ class ScrollBox extends HTMLElement
 		shadow.appendChild( style );
 		shadow.appendChild( document.createElement( 'slot' ) );
 	}
-}
+} );

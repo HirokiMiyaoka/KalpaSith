@@ -6,7 +6,15 @@ declare const commonmark:
 	HtmlRenderer: { new(): CMHtmlRenderer },
 }
 
-class CommonMark extends HTMLElement
+interface CommonMarkElement extends HTMLElement
+{
+	src: string;
+}
+
+( ( wc ) =>
+{
+	wc.Init();
+} )( class CommonMark extends HTMLElement implements CommonMarkElement
 {
 	public static Init( tagname = 'common-mark' ) { if ( customElements.get( tagname ) ) { return; } customElements.define( tagname, this ); }
 
@@ -89,4 +97,4 @@ class CommonMark extends HTMLElement
 			case 'src': this.onUpdateSrc( newVal ); break;
 		}
 	}
-}
+} );

@@ -27,15 +27,8 @@ document.addEventListener( 'DOMContentLoaded', () =>
 	// Modern browser.
 	(<HTMLElement>document.getElementById( 'legacy' )).style.display = 'none';
 
-	customElements.whenDefined( 'now-loading' ).then( () =>
-	{
-		return customElements.whenDefined( 'kalpa-sith' );
-	} );
-
 	// Init default components.
-	NowLoading.Init();
-	CommonMark.Init();
-	ScrollBox.Init();
+	WebComponentsManager.Exclude( 'kalpa-sith', 'now-loading', 'common-mark', 'scroll-box', 'qr-code' );
 	KalpaSith.Init();
 
 	( ( qrbutton: HTMLElement ) =>

@@ -1,4 +1,12 @@
-class NowLoading extends HTMLElement
+interface NowLoadingElement extends HTMLElement
+{
+	loading: boolean;
+}
+
+( ( wc ) =>
+{
+	wc.Init();
+} )( class NowLoading extends HTMLElement implements NowLoadingElement
 {
 	public static Init( tagname = 'now-loading' ) { if ( customElements.get( tagname ) ) { return; } customElements.define( tagname, this ); }
 
@@ -28,4 +36,4 @@ class NowLoading extends HTMLElement
 			this.removeAttribute( 'loading' );
 		}
 	}
-}
+} );

@@ -100,9 +100,9 @@ class AppHistory {
 }
 class WebComponentsManager {
     constructor(base = '') {
-        this.tags = {};
         this._suffix = '';
         this.base = base;
+        this.tags = Object.assign({}, WebComponentsManager.TAGS);
         const define = customElements.define;
         customElements.define = (name, constructor, option) => {
             if (!this.tags[name]) {
@@ -111,6 +111,19 @@ class WebComponentsManager {
             define.call(customElements, name, constructor, option);
         };
     }
+    static Exclude(...tags) {
+        tags.forEach((tag) => {
+            if (!this.TAGS[tag]) {
+                this.TAGS[tag] = document.createElement('script');
+            }
+            if (!this.TAGS[tag].hasAttribute('loaded')) {
+                this.TAGS[tag].setAttribute('loaded', '');
+            }
+        });
+    }
+    log(...message) { if (location.hostname === 'localhost') {
+        console.log(...message);
+    } }
     get suffix() { return this._suffix; }
     set suffix(value) { this._suffix = value ? '?' + value : ''; }
     exclude(...tags) {
@@ -137,7 +150,7 @@ class WebComponentsManager {
         if (!this.tags[tag]) {
             this.tags[tag] = document.createElement('script');
             if (!customElements.get(tag)) {
-                console.log('load:', tag);
+                this.log('load:', tag);
                 this.tags[tag].type = 'text/javascript';
                 this.tags[tag].onloadend = () => { this.tags[tag].setAttribute('loaded', ''); };
                 this.tags[tag].src = [this.base, tag, '.js', this.suffix].join('');
@@ -148,7 +161,7 @@ class WebComponentsManager {
     }
     load(tag) {
         tag = this.loadScript(tag);
-        return customElements.whenDefined(tag).then(() => { console.log('loaded:', tag); });
+        return customElements.whenDefined(tag).then(() => { this.log('loaded:', tag); });
     }
     async loadAsync(tags) {
         for (let i = 0; i < tags.length; ++i) {
@@ -198,7 +211,10 @@ class WebComponentsManager {
         return this.loadAsync(this.search(parent));
     }
 }
-class CommonMark extends HTMLElement {
+WebComponentsManager.TAGS = {};
+((wc) => {
+    wc.Init();
+})(class CommonMark extends HTMLElement {
     static Init(tagname = 'common-mark') { if (customElements.get(tagname)) {
         return;
     } customElements.define(tagname, this); }
@@ -263,8 +279,10 @@ class CommonMark extends HTMLElement {
                 break;
         }
     }
-}
-class NowLoading extends HTMLElement {
+});
+((wc) => {
+    wc.Init();
+})(class NowLoading extends HTMLElement {
     static Init(tagname = 'now-loading') { if (customElements.get(tagname)) {
         return;
     } customElements.define(tagname, this); }
@@ -287,8 +305,10 @@ class NowLoading extends HTMLElement {
             this.removeAttribute('loading');
         }
     }
-}
-class ScrollBox extends HTMLElement {
+});
+((wc) => {
+    wc.Init();
+})(class ScrollBox extends HTMLElement {
     static Init(tagname = 'scroll-box') { if (customElements.get(tagname)) {
         return;
     } customElements.define(tagname, this); }
@@ -308,7 +328,7 @@ class ScrollBox extends HTMLElement {
         shadow.appendChild(style);
         shadow.appendChild(document.createElement('slot'));
     }
-}
+});
 class KalpaSith extends HTMLElement {
     constructor() {
         super();
@@ -319,9 +339,8 @@ class KalpaSith extends HTMLElement {
         this.history = new AppHistory(this);
         this.components = new WebComponentsManager(root + 'wc/');
         this.components.suffix = KalpaSith.Version;
-        this.components.exclude('kalpa-sith', 'now-loading', 'common-mark', 'scroll-box', 'qr-code');
-        this.commonmark = new CommonMark();
-        this.nowloading = new NowLoading();
+        this.commonmark = new (customElements.get('common-mark'))();
+        this.nowloading = new (customElements.get('now-loading'))();
         document.body.appendChild(this.nowloading);
         const shadow = this.attachShadow({ mode: 'open' });
         const style = document.createElement('style');
@@ -353,9 +372,18 @@ class KalpaSith extends HTMLElement {
             return location.href;
         }).then((url) => { this.render(url); });
     }
-    static Init(tagname = 'kalpa-sith') { if (customElements.get(tagname)) {
-        return;
-    } customElements.define(tagname, this); }
+    static Init(tagname = 'kalpa-sith') {
+        if (customElements.get(tagname)) {
+            return Promise.resolve();
+        }
+        return Promise.all([
+            customElements.whenDefined('now-loading'),
+            customElements.whenDefined('common-mark'),
+        ]).then(() => {
+            customElements.define(tagname, this);
+            return customElements.whenDefined(tagname);
+        });
+    }
     loadComponents(...tags) {
         if (tags.length <= 0) {
             return this.components.searchAndLoadAsync(this);
@@ -487,12 +515,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
     document.getElementById('legacy').style.display = 'none';
-    customElements.whenDefined('now-loading').then(() => {
-        return customElements.whenDefined('kalpa-sith');
-    });
-    NowLoading.Init();
-    CommonMark.Init();
-    ScrollBox.Init();
+    WebComponentsManager.Exclude('kalpa-sith', 'now-loading', 'common-mark', 'scroll-box', 'qr-code');
     KalpaSith.Init();
     ((qrbutton) => {
         qrbutton.addEventListener('click', (link) => {
