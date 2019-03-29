@@ -447,6 +447,7 @@ class KalpaSith extends HTMLElement {
         this.commonmark.src = path;
         App.clear(this);
         this.appendChild(this.commonmark);
+        this.scrollReset();
         return Promise.resolve();
     }
     afterRender() {
@@ -462,6 +463,26 @@ class KalpaSith extends HTMLElement {
         const a = document.createElement('a');
         a.href = url;
         return a.pathname + '';
+    }
+    scrollReset() {
+        const target = this.getAttribute('scrollreset');
+        if (!target) {
+            return;
+        }
+        if (target.match(/^parent\:[0-9]+$/)) {
+            const params = target.split(':');
+            let max = Math.min(100, parseInt(params[1]));
+            let parent = this.parentElement;
+            while (0 < --max) {
+                if (!parent) {
+                    return;
+                }
+                parent = parent.parentElement;
+            }
+            if (parent) {
+                parent.scrollTo(0, 0);
+            }
+        }
     }
 }
 KalpaSith.Version = '';
