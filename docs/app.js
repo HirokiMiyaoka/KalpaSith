@@ -482,6 +482,10 @@ class KalpaSith extends HTMLElement {
             if (parent) {
                 parent.scrollTo(0, 0);
             }
+            return;
+        }
+        if (target === 'parent') {
+            this.parentElement.scrollTo(0, 0);
         }
     }
 }
@@ -538,37 +542,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('legacy').style.display = 'none';
     WebComponentsManager.Exclude('kalpa-sith', 'now-loading', 'common-mark', 'scroll-box', 'qr-code');
     KalpaSith.Init();
-    ((qrbutton) => {
-        qrbutton.addEventListener('click', (link) => {
-            const tid = qrbutton.dataset.target;
-            if (!tid) {
-                return;
-            }
-            const target = document.getElementById(tid);
-            if (!target) {
-                return;
-            }
-            if (target.classList.contains('show')) {
-                target.classList.remove('show');
-                return;
-            }
-            const url = location.href;
-            let first = false;
-            target.querySelectorAll('qr-code').forEach((qr) => {
-                if (!qr.value) {
-                    first = true;
-                }
-                if (qr.value === url) {
-                    return;
-                }
-                qr.value = url;
-            });
-            if (first) {
-                target.addEventListener('click', () => { target.classList.remove('show'); }, false);
-            }
-            target.classList.add('show');
-        }, false);
-    })(document.getElementById('qrlink'));
     if (App.script.dataset.sw) {
         const sw = new ServiceWorkerClient();
         sw.initServiceWorker(App.script.dataset.sw);

@@ -31,35 +31,6 @@ document.addEventListener( 'DOMContentLoaded', () =>
 	WebComponentsManager.Exclude( 'kalpa-sith', 'now-loading', 'common-mark', 'scroll-box', 'qr-code' );
 	KalpaSith.Init();
 
-	( ( qrbutton: HTMLElement ) =>
-	{
-		qrbutton.addEventListener( 'click', ( link ) =>
-		{
-			const tid = qrbutton.dataset.target;
-			if ( !tid ) { return; }
-			const target = document.getElementById( tid );
-			if ( !target ) { return; }
-
-			if ( target.classList.contains( 'show' ) )
-			{
-				target.classList.remove( 'show' );
-				return;
-			}
-
-			const url = location.href;
-			let first = false;
-			target.querySelectorAll( 'qr-code' ).forEach( ( qr: HTMLInputElement ) =>
-			{
-				if ( !qr.value ) { first = true; }
-				if ( qr.value === url ) { return; }
-				qr.value = url;
-			} );
-
-			if ( first ) { target.addEventListener( 'click', () => { target.classList.remove( 'show' ); }, false ); }
-			target.classList.add( 'show' );
-		}, false );
-	} )( <HTMLElement>document.getElementById( 'qrlink' ) );
-
 	if ( App.script.dataset.sw )
 	{
 		// Set ServiceWorker.

@@ -203,6 +203,12 @@ class KalpaSith extends HTMLElement implements Renderer
 				parent = parent.parentElement;
 			}
 			if ( parent ) { parent.scrollTo( 0, 0 ); }
+			return;
+		}
+
+		if ( target === 'parent' )
+		{
+			(<HTMLElement>this.parentElement).scrollTo( 0, 0 );
 		}
 	}
 }
