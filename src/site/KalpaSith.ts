@@ -48,6 +48,8 @@ class KalpaSith extends HTMLElement implements Renderer
 		this.nowloading = new (customElements.get( 'now-loading' ))();
 		document.body.appendChild( this.nowloading );
 
+		this.history.addEventListener( 'changeurl', ( event ) => { this.dispatchEvent( new Event( 'changeurl' ) ); } );
+
 		const shadow = this.attachShadow( { mode: 'open' } );
 
 		const style = document.createElement( 'style' );

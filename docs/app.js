@@ -53,8 +53,9 @@ const App = ((script) => {
     };
     return app;
 })(document.currentScript);
-class AppHistory {
+class AppHistory extends EventTarget {
     constructor(renderer) {
+        super();
         this.renderer = renderer;
         this.spa = typeof history.pushState === 'function';
         if (!this.spa) {
@@ -63,10 +64,12 @@ class AppHistory {
         window.addEventListener('popstate', (event) => { return this.onPopState(event); }, false);
     }
     onPopState(event) {
+        this.dispatchEvent(new Event('changeurl'));
         this.renderer.render(location.pathname);
     }
     gotoPage(url) {
         history.pushState(null, '', url + '');
+        this.dispatchEvent(new Event('changeurl'));
         return this.renderer.render(url + '');
     }
     convertAnchor(element = document.body) {
@@ -342,6 +345,7 @@ class KalpaSith extends HTMLElement {
         this.commonmark = new (customElements.get('common-mark'))();
         this.nowloading = new (customElements.get('now-loading'))();
         document.body.appendChild(this.nowloading);
+        this.history.addEventListener('changeurl', (event) => { this.dispatchEvent(new Event('changeurl')); });
         const shadow = this.attachShadow({ mode: 'open' });
         const style = document.createElement('style');
         style.innerHTML = [
@@ -491,6 +495,22 @@ class KalpaSith extends HTMLElement {
 }
 KalpaSith.Version = '';
 class ServiceWorkerClient {
+    static Remove() {
+        if (!navigator.serviceWorker) {
+            return Promise.reject(new Error('ServiceWorker disable.'));
+        }
+        return navigator.serviceWorker.getRegistrations().then((registrations) => {
+            return Promise.all(registrations.map((registration) => {
+                return registration.unregister().catch(() => { });
+            }));
+        }).then(() => {
+            return caches.keys().then((keys) => {
+                return Promise.all(keys.map((key) => {
+                    return caches.delete(key).catch(() => { });
+                }));
+            });
+        }).then(() => { });
+    }
     initServiceWorker(script = '/sw.js') {
         if (!navigator.serviceWorker) {
             throw 'ServiceWorker disable.';
@@ -508,16 +528,16 @@ class ServiceWorkerClient {
     }
     sendMessage(message) {
         return new Promise((resolve, reject) => {
-            var sw = navigator.serviceWorker.controller;
+            const sw = navigator.serviceWorker.controller;
             if (!sw) {
                 return;
             }
-            var channel = new MessageChannel();
+            const channel = new MessageChannel();
             channel.port1.addEventListener('message', (event) => { resolve(event); }, false);
             sw.postMessage(message, [channel.port2]);
         }).then((data) => {
             console.log('message:', data);
-            return data;
+            return data.data;
         });
     }
 }

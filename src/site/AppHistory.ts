@@ -5,13 +5,15 @@ interface Renderer
 	render( url: string ): Promise<any>;
 }
 
-class AppHistory
+class AppHistory extends EventTarget
 {
 	private renderer: Renderer;
 	private spa: boolean;
 
 	constructor( renderer: Renderer )
 	{
+		super();
+
 		this.renderer = renderer;
 		this.spa = typeof history.pushState === 'function';
 
@@ -22,12 +24,14 @@ class AppHistory
 
 	private onPopState( event: PopStateEvent )
 	{
+		this.dispatchEvent( new Event( 'changeurl' ) );
 		this.renderer.render( location.pathname );
 	}
 
 	public gotoPage( url: string )
 	{
 		history.pushState( null, '', url + '' );
+		this.dispatchEvent( new Event( 'changeurl' ) );
 		return this.renderer.render( url + '' );
 	}
 

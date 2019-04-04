@@ -1,6 +1,29 @@
 
 class ServiceWorkerClient
 {
+	public static Remove()
+	{
+		if ( !navigator.serviceWorker ) { return Promise.reject( new Error( 'ServiceWorker disable.' ) ); }
+		return navigator.serviceWorker.getRegistrations().then( ( registrations ) =>
+		{
+			// Remove ServiceWorkers.
+			return Promise.all( registrations.map( ( registration ) =>
+			{
+				return registration.unregister().catch( () => {} );
+			} ) );
+		} ).then( () =>
+		{
+			// Remove caches.
+			return caches.keys().then( ( keys ) =>
+			{
+				return Promise.all( keys.map( ( key ) =>
+				{
+					return caches.delete( key ).catch( () => {} );
+				} ) );
+			} );
+		} ).then( () => {});
+	}
+
 	public initServiceWorker( script = '/sw.js' )
 	{
 		if ( !navigator.serviceWorker ) { throw 'ServiceWorker disable.'; }
@@ -19,19 +42,19 @@ class ServiceWorkerClient
 
 	public sendMessage( message: SW_MESSAGE )
 	{
-		return new Promise( ( resolve, reject ) =>
+		return new Promise<MessageEvent>( ( resolve, reject ) =>
 		{
-			var sw = navigator.serviceWorker.controller;
+			const sw = navigator.serviceWorker.controller;
 			if ( !sw ) { return; }
 
-			var channel = new MessageChannel();
+			const channel = new MessageChannel();
 			channel.port1.addEventListener( 'message', ( event ) => { resolve( event ); }, false );
 			sw.postMessage( message, [ channel.port2 ] );
 		} ).then( ( data ) =>
 		{
 			// maybe cannot work.
 			console.log( 'message:', data );
-			return data;
+			return <SW_MESSAGE>data.data;
 		} );
 	}
 }
