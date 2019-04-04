@@ -215,73 +215,76 @@ class WebComponentsManager {
     }
 }
 WebComponentsManager.TAGS = {};
-((wc) => {
-    wc.Init();
-})(class CommonMark extends HTMLElement {
-    static Init(tagname = 'common-mark') { if (customElements.get(tagname)) {
-        return;
-    } customElements.define(tagname, this); }
-    static cmarked(md) {
-        const reader = new commonmark.Parser();
-        const writer = new commonmark.HtmlRenderer();
-        const parsed = reader.parse(md);
-        return writer.render(parsed);
-    }
-    static render(md, target) { target.innerHTML = this.cmarked(md); }
-    constructor() {
-        super();
-        const shadow = this.attachShadow({ mode: 'open' });
-        const style = document.createElement('style');
-        style.innerHTML = [
-            ':host { display: block; width: 100%; height: fit-content; }',
-        ].join('');
-        const slot = document.createElement('slot');
-        const observer = new MutationObserver((mutations) => {
-            mutations.forEach((mutation) => {
-                switch (mutation.type) {
-                    case 'childList': return this.onUpdateChildList(mutation);
-                }
+((init) => {
+    init();
+})(() => {
+    class CommonMark extends HTMLElement {
+        static Init(tagname = 'common-mark') { if (customElements.get(tagname)) {
+            return;
+        } customElements.define(tagname, this); }
+        static cmarked(md) {
+            const reader = new commonmark.Parser();
+            const writer = new commonmark.HtmlRenderer();
+            const parsed = reader.parse(md);
+            return writer.render(parsed);
+        }
+        static render(md, target) { target.innerHTML = this.cmarked(md); }
+        constructor() {
+            super();
+            const shadow = this.attachShadow({ mode: 'open' });
+            const style = document.createElement('style');
+            style.innerHTML = [
+                ':host { display: block; width: 100%; height: fit-content; }',
+            ].join('');
+            const slot = document.createElement('slot');
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    switch (mutation.type) {
+                        case 'childList': return this.onUpdateChildList(mutation);
+                    }
+                });
             });
-        });
-        observer.observe(this, { childList: true });
-        shadow.appendChild(style);
-        shadow.appendChild(document.createElement('slot'));
-        this.onUpdateSource();
-    }
-    onUpdateChildList(mutation) {
-        if (mutation.addedNodes.length !== 1 || mutation.addedNodes[0].nodeName !== '#text') {
-            return;
+            observer.observe(this, { childList: true });
+            shadow.appendChild(style);
+            shadow.appendChild(document.createElement('slot'));
+            this.onUpdateSource();
         }
-        this.onUpdateSource();
-    }
-    onUpdateSource() {
-        this.innerHTML = CommonMark.cmarked(this.textContent || '');
-        this.dispatchEvent(new Event('change'));
-    }
-    onUpdateSrc(value) {
-        if (!value) {
-            return;
+        onUpdateChildList(mutation) {
+            if (mutation.addedNodes.length !== 1 || mutation.addedNodes[0].nodeName !== '#text') {
+                return;
+            }
+            this.onUpdateSource();
         }
-        App.fetchText(value).then((md) => {
-            this.textContent = md;
-            this.dispatchEvent(new Event('load'));
-        }).catch((error) => {
-            this.dispatchEvent(new Event('error'));
-        });
-    }
-    get src() { return this.getAttribute('src') || ''; }
-    set src(value) { this.setAttribute('src', value || ''); }
-    static get observedAttributes() { return ['src']; }
-    attributeChangedCallback(attrName, oldVal, newVal) {
-        if (oldVal === newVal) {
-            return;
+        onUpdateSource() {
+            this.innerHTML = CommonMark.cmarked(this.textContent || '');
+            this.dispatchEvent(new Event('change'));
         }
-        switch (attrName) {
-            case 'src':
-                this.onUpdateSrc(newVal);
-                break;
+        onUpdateSrc(value) {
+            if (!value) {
+                return;
+            }
+            App.fetchText(value).then((md) => {
+                this.textContent = md;
+                this.dispatchEvent(new Event('load'));
+            }).catch((error) => {
+                this.dispatchEvent(new Event('error'));
+            });
+        }
+        get src() { return this.getAttribute('src') || ''; }
+        set src(value) { this.setAttribute('src', value || ''); }
+        static get observedAttributes() { return ['src']; }
+        attributeChangedCallback(attrName, oldVal, newVal) {
+            if (oldVal === newVal) {
+                return;
+            }
+            switch (attrName) {
+                case 'src':
+                    this.onUpdateSrc(newVal);
+                    break;
+            }
         }
     }
+    CommonMark.Init();
 });
 ((wc) => {
     wc.Init();
