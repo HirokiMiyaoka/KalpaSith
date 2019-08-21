@@ -50,7 +50,7 @@ class AppHistory extends EventTarget
 		}
 	}
 
-	private jumpPage( url: string )
+	public jumpPage( url: string )
 	{
 		return ( event: MouseEvent ) =>
 		{

@@ -14,19 +14,22 @@ interface GetParams {
 interface Renderer {
     render(url: string): Promise<any>;
 }
-declare class AppHistory {
+declare class AppHistory extends EventTarget {
     private renderer;
     private spa;
     constructor(renderer: Renderer);
     private onPopState;
     gotoPage(url: string): Promise<any>;
     convertAnchor(element?: HTMLElement): void;
-    private jumpPage;
+    jumpPage(url: string): (event: MouseEvent) => boolean;
 }
 declare class WebComponentsManager {
+    private static TAGS;
+    static Exclude(...tags: string[]): void;
     private base;
     private tags;
     constructor(base?: string);
+    private log;
     private _suffix;
     suffix: string;
     exclude(...tags: string[]): void;
@@ -57,26 +60,11 @@ declare const commonmark: {
         new (): CMHtmlRenderer;
     };
 };
-declare class CommonMark extends HTMLElement {
-    static Init(tagname?: string): void;
-    static cmarked(md: string): string;
-    static render(md: string, target: HTMLElement): void;
-    constructor();
-    private onUpdateChildList;
-    private onUpdateSource;
-    private onUpdateSrc;
+interface CommonMarkElement extends HTMLElement {
     src: string;
-    static readonly observedAttributes: string[];
-    attributeChangedCallback(attrName: string, oldVal: any, newVal: any): void;
 }
-declare class NowLoading extends HTMLElement {
-    static Init(tagname?: string): void;
-    constructor();
+interface NowLoadingElement extends HTMLElement {
     loading: boolean;
-}
-declare class ScrollBox extends HTMLElement {
-    static Init(tagname?: string): void;
-    constructor();
 }
 interface KalpaSithModule extends Renderer, HTMLElement {
     isSupported(path: string): boolean;
@@ -89,7 +77,7 @@ declare class KalpaSith extends HTMLElement implements Renderer {
     private history;
     private components;
     private commonmark;
-    static Init(tagname?: string): void;
+    static Init(tagname?: string): Promise<void>;
     constructor();
     loadComponents(...tags: string[]): Promise<void>;
     addModule(mod: KalpaSithModule, update?: boolean): boolean;
@@ -97,14 +85,17 @@ declare class KalpaSith extends HTMLElement implements Renderer {
     loading(on: boolean): void;
     clear(): void;
     gotoPage(url: string): Promise<any>;
+    jumpPage(url: string): (event: MouseEvent) => boolean;
     render(url: string): Promise<any>;
     private afterRender;
     update(): void;
     private parseUrlPath;
+    private scrollReset;
 }
 declare class ServiceWorkerClient {
+    static Remove(): Promise<void>;
     initServiceWorker(script?: string): Promise<ServiceWorkerRegistration>;
     resetCache(): Promise<SW_MESSAGE_CACHE>;
-    sendMessage(message: SW_MESSAGE): Promise<{}>;
+    sendMessage(message: SW_MESSAGE): Promise<SW_MESSAGE>;
 }
 declare function BrowserCheck(): boolean;

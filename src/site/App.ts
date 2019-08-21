@@ -32,7 +32,7 @@ const App = ( ( script: HTMLScriptElement ) =>
 		return fetch( input, init ).then( ( result ) =>
 		{
 			if ( result.ok ) { return <Promise<T>>result.json(); }
-			return result.json().then( ( result ) => { throw result; } )
+			return result.json().then( ( result ) => { throw result; } );
 		} );
 	}
 
@@ -41,7 +41,7 @@ const App = ( ( script: HTMLScriptElement ) =>
 		return fetch( input, init ).then( ( result ) =>
 		{
 			if ( result.ok ) { return result.text(); }
-			return result.text().then( ( result ) => { throw result; } )
+			return result.text().then( ( result ) => { throw result; } );
 		} );
 	}
 

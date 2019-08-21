@@ -138,6 +138,8 @@ class KalpaSith extends HTMLElement implements Renderer
 
 	public gotoPage( url: string ) { return this.history.gotoPage( url ); }
 
+	public jumpPage( url: string ) { return this.history.jumpPage( url ); }
+
 	public render( url: string ): Promise<any>
 	{
 		let path = this.parseUrlPath( url );

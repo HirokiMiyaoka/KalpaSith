@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build:site": "tsc -p src/site",
+    "build:type": "tsc -p src",
     "build:components": "tsc -p src/components",
     "build:sw": "tsc -p src/sw",
     "start": "node tools/server.js",

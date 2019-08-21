@@ -435,6 +435,7 @@ class KalpaSith extends HTMLElement {
         App.clear(this);
     }
     gotoPage(url) { return this.history.gotoPage(url); }
+    jumpPage(url) { return this.history.jumpPage(url); }
     render(url) {
         let path = this.parseUrlPath(url);
         this.loading(true);
